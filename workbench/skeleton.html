@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>紫薯观影手账 · 电影小说记录本</title>
+<!-- 本工作台通过 WorkBuddy「资料库」skill 搭建、存储和部署 -->
+<style>
+:root{
+  --bg:#f3edff; --bg2:#e9dcff; --card:#ffffff; --ink:#4a3b63; --ink2:#8b7aa8;
+  --purple:#a78bfa; --purple-d:#8b5cf6; --purple-l:#ede4ff; --pink:#ffb3d9; --pink-l:#ffe6f3;
+  --silver:#dfe6ef; --silver-d:#a8b6c8; --line:#e7ddf7; --warn:#f0685f; --ok:#5fbf8f;
+  --shadow:0 6px 22px rgba(167,139,250,.16); --r:20px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:linear-gradient(170deg,var(--bg) 0%,var(--bg2) 55%,#f8f0ff 100%);
+  background-attachment:fixed; color:var(--ink); min-height:100vh;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom)); line-height:1.65;
+}
+.wrap{max-width:1100px;margin:0 auto;padding:0 14px}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;margin-bottom:16px;border:2px solid var(--line);overflow:visible}
+
+/* ======= 顶栏 ======= */
+header{padding:26px 0 14px;text-align:center;position:relative}
+h1{font-size:27px;font-weight:800;letter-spacing:1px;
+  background:linear-gradient(100deg,#a78bfa,#ff9ecd 55%,#9fb8d8);-webkit-background-clip:text;
+  background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--ink2);font-size:13px;margin-top:6px}
+.sync{display:inline-flex;align-items:center;gap:6px;font-size:12px;background:#fff;border:2px solid var(--line);
+  padding:5px 13px;border-radius:999px;color:var(--ink2);margin-top:11px;box-shadow:var(--shadow)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
+.dot.busy{background:#f5c451;animation:pulse 1s infinite}
+.dot.off{background:var(--warn)}
+@keyframes pulse{50%{opacity:.3}}
+
+/* ======= 角色卡（放大 + 悬浮动效） ======= */
+.hero{display:flex;align-items:center;gap:14px}
+.avt{width:200px;flex:none;text-align:center;position:relative;isolation:isolate;
+  animation:float 4.5s ease-in-out infinite}
+.avt img{width:100%;border-radius:22px;display:block;position:relative;z-index:2;
+  background:linear-gradient(170deg,#fff,#faf7ff);
+  border:2px solid var(--line);
+  filter:drop-shadow(0 8px 18px rgba(167,139,250,.28))}
+.avt .aura{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:190px;height:190px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(167,139,250,.22),rgba(167,139,250,0) 70%);
+  z-index:0;animation:breathe 4.5s ease-in-out infinite}
+.hero{position:relative}
+.avt{position:relative}
+.avt:nth-of-type(2) .aura{background:radial-gradient(circle,rgba(255,179,217,.26),rgba(255,179,217,0) 70%)}
+@keyframes float{
+  0%,100%{transform:translateY(0) rotate(-1deg)}
+  50%{transform:translateY(-14px) rotate(1.2deg)}
+}
+@keyframes breathe{
+  0%,100%{transform:scale(1);opacity:.85}
+  50%{transform:scale(1.14);opacity:1}
+}
+.avt .shadow{position:relative;z-index:1;width:56%;height:12px;border-radius:50%;margin:2px auto 0;  background:radial-gradient(ellipse,rgba(139,92,246,.24),transparent 70%);
+  animation:shrink 4.5s ease-in-out infinite}
+@keyframes shrink{0%,100%{width:56%;opacity:.85}50%{width:44%;opacity:.5}}
+/* 换装徽章：未解锁灰锁，已解锁提示可换 */
+.outfit-badge{position:relative;z-index:3;display:inline-block;margin-top:6px;
+  font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:999px;
+  background:#efe9fb;color:#9a8bb8;border:1.5px solid #ded4f2;line-height:1.4}
+.outfit-badge.ready{background:linear-gradient(135deg,#fff0f7,#eae2ff);color:#7c5cd6;
+  border-color:#c9b6f2;box-shadow:0 2px 10px rgba(167,139,250,.3);animation:badgePulse 1.8s ease-in-out infinite}
+.outfit-badge.worn{background:linear-gradient(135deg,#e8f7ff,#eae2ff);color:#5b8fd6;border-color:#bcd8f5}
+@keyframes badgePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+/* 换装按钮：未解锁时置灰不可点 */
+button.dress{border-style:dashed}
+button.dress.locked{opacity:.5;cursor:not-allowed;filter:grayscale(.7)}
+button.dress.on{background:var(--purple);color:#fff;border-color:var(--purple-d)}
+
+/* ======= 能量条 ======= */
+.energy{margin-top:11px}
+.energy .etop{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink2);font-weight:700;margin-bottom:6px}
+.energy .elv{background:#fff;border:2px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--purple-d)}
+.ebar{display:grid;grid-template-columns:repeat(18,1fr);gap:3px}
+.ebar i{height:9px;border-radius:2px;background:#eee8fa;transition:background .2s,box-shadow .2s}
+.ebar i.on{background:var(--ec,var(--purple));box-shadow:0 0 5px var(--ec,var(--purple))}
+.ebar i.pop{animation:epop .5s ease}
+@keyframes epop{0%{transform:scaleY(1)}50%{transform:scaleY(2.1)}100%{transform:scaleY(1)}}
+.ebar.glow i.on{animation:eglow 1.8s ease}
+@keyframes eglow{0%,100%{box-shadow:0 0 5px var(--ec)}50%{box-shadow:0 0 16px 4px var(--ec)}}
+
+/* ======= 感谢弹层 ======= */
+.thanks{position:fixed;left:50%;top:26%;transform:translate(-50%,-14px) scale(.94);z-index:120;
+  background:rgba(255,255,255,.97);border:2.5px solid var(--tc,var(--purple));border-radius:22px;
+  padding:18px 26px;text-align:center;box-shadow:0 14px 44px rgba(140,110,200,.3);
+  opacity:0;pointer-events:none;transition:opacity .32s,transform .32s;isolation:isolate}
+.thanks.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.thanks p{font-size:16.5px;font-weight:800;color:#5b4a7a;position:relative;z-index:1}
+.thanks span{font-size:11.5px;color:var(--ink2);display:block;margin-top:5px;position:relative;z-index:1}
+.thx-glow{position:absolute;inset:-24px;border-radius:34px;pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(var(--tc-rgb,167,139,250),.42),transparent 68%);
+  animation:tpulse 1.8s ease-in-out infinite;z-index:0}
+@keyframes tpulse{0%,100%{opacity:.55;transform:scale(.96)}50%{opacity:1;transform:scale(1.06)}}
+.bubble{position:relative;flex:1;background:var(--purple-l);border:2px solid var(--purple);
+  border-radius:20px;padding:15px 18px;font-size:14.5px;font-weight:600;color:var(--ink)}
+.bubble::before{content:"";position:absolute;left:-10px;top:26px;width:18px;height:18px;
+  background:var(--purple-l);border-left:2px solid var(--purple);border-bottom:2px solid var(--purple);
+  transform:rotate(45deg);border-radius:0 0 0 4px}
+.bubble.hi{background:var(--pink-l);border-color:var(--pink)}
+.bubble.hi::before{background:var(--pink-l);border-color:var(--pink)}
+.bubble.ag{background:var(--silver);border-color:var(--silver-d)}
+.bubble.ag::before{background:var(--silver);border-color:var(--silver-d)}
+.bubble p{margin-bottom:8px}
+.bubble .who{font-size:11.5px;color:var(--ink2);font-weight:500;display:block;margin-top:9px}
+.acts{display:flex;gap:9px;flex-wrap:wrap;margin-top:11px}
+
+/* ======= 按钮 ======= */
+button,.btn{font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;border:none;
+  border-radius:13px;padding:11px 18px;min-height:44px;display:inline-flex;align-items:center;
+  justify-content:center;gap:6px;transition:transform .12s,box-shadow .12s;background:var(--purple-l);color:var(--purple-d)}
+button:active,.btn:active{transform:scale(.96)}
+button:hover,.btn:hover{box-shadow:0 4px 12px rgba(167,139,250,.3)}
+button.primary{background:linear-gradient(120deg,var(--purple),#c4a6ff);color:#fff}
+button.pink{background:var(--pink-l);color:#d1618f}
+button.silver{background:var(--silver);color:#61738c}
+button.ghost{background:#fff;border:2px solid var(--line);color:var(--ink2)}
+button.sm{padding:8px 14px;min-height:38px;font-size:13px;border-radius:11px}
+button[disabled]{opacity:.55;cursor:not-allowed}
+svg.ico{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
+
+/* ======= 今天要处理 ======= */
+.today{border:2px dashed var(--purple);background:linear-gradient(135deg,#fff,#faf6ff)}
+.today h2{font-size:17px;margin-bottom:11px;display:flex;align-items:center;gap:8px}
+.titem{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:14px;
+  background:#fff;border:1.5px solid var(--line);margin-bottom:9px}
+.titem.over{border-color:#ffc9c5;background:#fff6f5}
+.titem .nm{flex:1;font-size:14px;font-weight:700;min-width:0}
+.titem .nm small{display:block;font-weight:500;color:var(--ink2);font-size:11.5px;margin-top:2px}
+.titem.over .nm{color:var(--warn)}
+
+/* ======= 表单 ======= */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:11px}
+label{display:block;font-size:12.5px;font-weight:700;color:var(--ink2);margin-bottom:5px}
+input,select,textarea{font-family:inherit;font-size:16px;width:100%;padding:11px 13px;
+  border:2px solid var(--line);border-radius:13px;background:#fdfbff;color:var(--ink);
+  outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--purple);background:#fff}
+/* 防御：确保下拉框始终可点击、可弹出 */
+select{appearance:auto;-webkit-appearance:menulist;pointer-events:auto;
+  cursor:pointer;position:relative;z-index:1;background-image:none}
+select:disabled{opacity:.7;cursor:not-allowed}
+.grid>div{position:relative;z-index:1}
+/* 下拉所在的格子整体抬升，菜单才能盖住后面的评分等格子 */
+.grid>div:has(.dd.open){z-index:80}
+.grid>div:has(.dd.open) .dd{z-index:80}
+
+/* ======= 自定义下拉框（不依赖原生 select） ======= */
+.dd{position:relative;z-index:5}
+.dd-btn{width:100%;font-family:inherit;font-size:16px;text-align:left;cursor:pointer;
+  padding:11px 38px 11px 13px;border:2px solid var(--line);border-radius:13px;
+  background:#fdfbff;color:var(--ink);min-height:46px;display:flex;align-items:center;
+  transition:border-color .15s,box-shadow .15s;position:relative}
+.dd-btn:hover{border-color:var(--purple)}
+.dd-btn.open{border-color:var(--purple);background:#fff;box-shadow:0 4px 14px rgba(167,139,250,.22)}
+.dd-txt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dd-txt.ph{color:var(--ink2)}
+.dd-ar{position:absolute;right:12px;width:18px;height:18px;flex:none;fill:none;
+  stroke:var(--purple-d);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;
+  transition:transform .2s;pointer-events:none}
+.dd-btn.open .dd-ar{transform:rotate(180deg)}
+.sm-dd{font-size:14px;min-height:42px;padding:9px 34px 9px 12px}
+.dd-menu{position:absolute;left:0;right:0;bottom:calc(100% + 6px);background:#fff;
+  border:2px solid var(--purple);border-radius:14px;box-shadow:0 12px 34px rgba(140,110,200,.26);
+  padding:5px;z-index:60;display:none;max-height:min(262px,46vh);overflow-y:auto;-webkit-overflow-scrolling:touch}
+/* 空间不足时才改为向下弹出（由 JS 加 .dd-down） */
+.dd.dd-down .dd-menu{bottom:auto;top:calc(100% + 6px)}
+.dd.open{z-index:80}
+.dd.open .dd-menu{z-index:90;position:absolute}
+.dd.open .dd-menu{display:block;animation:ddIn .16s ease}
+@keyframes ddIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.dd.dd-down.open .dd-menu{animation-name:ddInDown}
+@keyframes ddInDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.grid>div.dd-host-open{z-index:80}
+.grid>div.dd-host-open .dd{z-index:80}
+/* 下拉展开期间，屏蔽评分等输入控件，杜绝误触 */
+body.dd-locked #f-score,body.dd-locked #f-date,body.dd-locked #f-title,
+body.dd-locked #f-feel,body.dd-locked #q{pointer-events:none;user-select:none}
+/* 展开期间屏蔽卡片内其他区域，只放行下拉宿主（防误触兜底） */
+body.dd-locked .card *{pointer-events:none}
+body.dd-locked .dd-host-open,body.dd-locked .dd-host-open *{pointer-events:auto}
+.dd-opt{display:flex;align-items:center;gap:8px;padding:11px 13px;border-radius:10px;
+  font-size:15.5px;font-weight:600;cursor:pointer;color:var(--ink);min-height:44px}
+.dd-opt:hover{background:var(--purple-l)}
+.dd-opt.sel{background:var(--purple);color:#fff}
+.dd-opt.sel:hover{background:var(--purple-d)}
+.dd-opt .ck{margin-left:auto;font-weight:800}
+textarea{resize:vertical;min-height:70px;line-height:1.6}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+.tg{padding:8px 14px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;
+  background:#f6f1ff;border:2px solid var(--line);color:var(--ink2);min-height:38px;
+  display:inline-flex;align-items:center;user-select:none}
+.tg.on{background:var(--purple);border-color:var(--purple-d);color:#fff}
+.drop{border:2.5px dashed var(--purple);border-radius:17px;padding:22px 16px;text-align:center;
+  background:var(--purple-l);cursor:pointer;transition:background .15s}
+.drop:hover{background:#e5daff}
+.drop p{font-size:13.5px;color:var(--purple-d);font-weight:700;margin-top:9px}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+.thumb{width:74px;height:74px;border-radius:12px;object-fit:cover;border:2px solid var(--purple)}
+
+/* ======= 搜索 ======= */
+.srch{display:flex;gap:9px;flex-wrap:wrap}
+.srch input{flex:1;min-width:150px}
+.res{border:1.5px solid var(--line);border-radius:15px;padding:13px;margin-bottom:10px;background:#fff}
+.res .tt{font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.res .mt{font-size:12.5px;color:var(--ink2);margin-top:5px;line-height:1.7}
+.res .quote{font-size:13px;margin-top:8px;padding:10px 13px;background:#faf7ff;
+  border-left:3px solid var(--purple);border-radius:0 10px 10px 0;font-style:italic}
+.pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;
+  background:var(--purple-l);color:var(--purple-d)}
+.pill.pk{background:var(--pink-l);color:#d1618f}
+.pill.ag{background:var(--silver);color:#61738c}
+
+/* ======= 推荐 ======= */
+.rlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:13px}
+.rc{border:2px solid var(--silver);border-radius:18px;padding:15px;background:linear-gradient(160deg,#fff,#f7fbff)}
+.rc .sc{font-size:22px;font-weight:800;color:var(--silver-d)}
+.rc h3{font-size:16px;margin:5px 0 8px}
+.rc .rs{font-size:13px;color:var(--ink2);line-height:1.7}
+
+/* ======= 列表 ======= */
+.rec{border:1.5px solid var(--line);border-radius:16px;padding:14px;margin-bottom:11px;background:#fff}
+.rec-acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.rec-acts .sm{flex:1;min-width:88px;min-height:40px}
+.rec .top{display:flex;gap:11px;align-items:flex-start}
+.rec .cover{width:56px;height:72px;border-radius:11px;background:var(--purple-l);flex:none;
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+.rec .cover img{width:100%;height:100%;object-fit:cover}
+.rec h3{font-size:15.5px;font-weight:800;margin-bottom:5px}
+.rec .feel{font-size:13px;color:var(--ink2);margin-top:7px;font-style:italic}
+.stars{color:#f5c451;font-size:13px;letter-spacing:1px}
+.empty{text-align:center;padding:26px 14px;color:var(--ink2);font-size:13.5px}
+.empty svg{width:52px;height:52px;opacity:.4;margin-bottom:9px}
+
+footer{text-align:center;color:var(--ink2);font-size:12px;padding:20px 0 6px}
+.st-tabs{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.97);
+  border-top:2px solid var(--line);padding:7px 4px calc(7px + env(safe-area-inset-bottom));
+  z-index:50;box-shadow:0 -3px 14px rgba(167,139,250,.13)}
+.st-tab{flex:1;text-align:center;font-size:10.5px;color:var(--ink2);font-weight:700;padding:5px 0;cursor:pointer}
+.st-tab svg{margin:0 auto 3px}
+.st-tab.on{color:var(--purple-d)}
+
+/* ======= 响应式 ======= */
+@media (max-width:768px){
+  .hero{flex-direction:column;text-align:center;gap:11px}
+  .bubble{text-align:left}
+  .bubble::before{display:none}
+  .avt{width:138px}
+  .avt .aura{width:132px;height:132px}
+  .acts{justify-content:center}
+  h1{font-size:23px}
+  .card{padding:15px;border-radius:18px}
+  .rlist{grid-template-columns:1fr}
+  .st-tabs{display:flex}
+  body{padding-bottom:78px}
+}
+@media (max-width:380px){
+  .avt{width:120px}
+  .avt .aura{width:116px;height:116px}
+}
+@media (prefers-reduced-motion:reduce){
+  .avt,.avt .aura,.avt .shadow{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>紫薯观影手账</h1>
+    <p class="sub">电影 · 小说 · 影评解说，一个本子全记下来</p>
+    <div class="sync" id="syncBox"><span class="dot" id="syncDot"></span><span id="syncTxt">正在连接…</span></div>
+  </header>
+
+  <!-- ========== 今天要处理 ========== -->
+  <section class="card today" id="todayCard">
+    <h2><svg class="ico" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>今天要处理</h2>
+    <div id="todayList"></div>
+  </section>
+
+  <!-- ========== 模块1 记录 ========== -->
+  <section class="card" id="mod1">
+    <div class="hero">
+      <div class="avt" data-char="m1"><span class="aura"></span><img data-outfit="0" src="https://workbuddy-space-static.codebuddy.work/image/JRVAIUB3K8sByHsE0Me0J3.jpg" alt="记录小助手"><div class="shadow"></div><span class="outfit-badge" id="ob-m1">Lv.1 解锁裤装</span></div>
+      <div class="bubble">
+        <p id="m1Talk">宝宝可以告诉我你最近看的电影和小说吗</p>
+        <span class="who">记录小助手 · 温柔待你</span>
+        <div class="acts">
+          <button class="sm" id="talkNext1">换一句</button>
+          <button class="sm dress" id="dress1">换裤装</button>
+          <button class="sm ghost" id="jumpList">看看我的记录</button>
+        </div>
+        <div class="energy" style="--ec:#a78bfa">
+          <div class="etop"><span class="elv" id="elv-m1">Lv.0</span><span>能量 · 72格升一级，Lv.1 解锁裤装</span></div>
+          <div class="ebar" id="eg-m1"></div>
+        </div>
+      </div>
+    </div>
+    <form id="recForm" style="margin-top:16px" autocomplete="off">
+      <div class="grid">
+        <div><label for="f-title">作品名 <span style="color:var(--warn)">*</span></label>
+          <input id="f-title" name="title" type="text" placeholder="例：请回答1988" required maxlength="60"></div>
+        <div><label id="lb-f-type">类型</label><div class="dd" id="f-type"><button type="button" class="dd-btn" data-dd><span class="dd-txt">请选择类型</span><svg class="dd-ar" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button><div class="dd-menu"></div></div></div>
+        <div><label id="lb-f-status">状态</label><div class="dd" id="f-status"><button type="button" class="dd-btn" data-dd><span class="dd-txt">请选择状态</span><svg class="dd-ar" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button><div class="dd-menu"></div></div></div>
+        <div><label for="f-score">评分</label>
+          <input id="f-score" name="score" type="number" step="0.1" min="0" max="10" placeholder="0 - 10"></div>
+        <div><label for="f-date">记录日期</label><input id="f-date" name="date" type="date"></div>
+      </div>
+      <div style="margin-top:11px"><label>标签</label><div class="tags" id="tagBox"></div></div>
+      <div style="margin-top:11px"><label for="f-feel">一句话感受</label>
+        <textarea id="f-feel" name="feel" placeholder="写下当时的心情…" maxlength="200"></textarea></div>
+      <div style="margin-top:11px"><label>上传图片（封面 / 截图，最多 6 张）</label>
+        <div class="drop" id="drop">
+          <svg class="ico" viewBox="0 0 24 24" style="width:30px;height:30px;color:var(--purple-d)"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <p>点这里选择图片</p>
+          <input type="file" id="file" accept="image/*" multiple hidden>
+        </div>
+        <div class="thumbs" id="thumbs"></div></div>
+      <div class="acts" style="margin-top:14px">
+        <button class="primary" type="submit" id="submitBtn">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg><span id="submitTxt">存进手账</span></button>
+        <button class="ghost" type="reset">清空</button>
+        <button class="ghost" type="button" id="cancelEdit" style="display:none">取消编辑</button>
+      </div>
+      <div id="editBar" style="display:none;margin-top:11px;padding:10px 13px;border-radius:12px;
+        background:var(--purple-l);border:2px solid var(--purple);font-size:13.5px;font-weight:700;
+        color:#5b4a7a;align-items:center;gap:8px">
+        <svg class="ico" viewBox="0 0 24 24" style="width:17px;height:17px;flex:none"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
+        <span>正在编辑：<b id="editName"></b>　改完点「保存修改」</span>
+      </div>
+      <p id="recMsg" style="font-size:13px;margin-top:9px;color:var(--ok);font-weight:700"></p>
+    </form>
+    <div style="margin-top:20px;padding-top:16px;border-top:2px dashed var(--line)">
+      <h3 style="font-size:15px;margin-bottom:11px">我的记录（<span id="recCount" data-sp-bindable="database" data-sp-database-id="l7QS9IsJihcaB0K9mAUqO0">0</span> 条）</h3>
+      <div class="acts" style="margin-bottom:12px">
+        <div class="dd" id="filterType"><button type="button" class="dd-btn sm-dd" data-dd><span class="dd-txt">全部类型</span><svg class="dd-ar" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button><div class="dd-menu"></div></div>
+        <div class="dd" id="filterStatus"><button type="button" class="dd-btn sm-dd" data-dd><span class="dd-txt">全部状态</span><svg class="dd-ar" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button><div class="dd-menu"></div></div>
+      </div>
+      <div id="recList"></div>
+    </div>
+  </section>
+
+  <!-- ========== 模块2 查找 ========== -->
+  <section class="card" id="mod2">
+    <div class="hero">
+      <div class="avt" data-char="m2"><span class="aura"></span><img data-outfit="0" src="https://workbuddy-space-static.codebuddy.work/image/4SJJUgHItVjK5skqSxJ3yT.jpg" alt="查找小助手"><div class="shadow"></div><span class="outfit-badge" id="ob-m2">Lv.1 解锁背带裤</span></div>
+      <div class="bubble hi">
+        <p id="m2Talk">其实我也没有很想你。</p>
+        <span class="who">查找小助手 · 傲娇但可靠</span>
+        <div class="acts"><button class="sm pink" id="talkNext2">换一句</button>
+          <button class="sm dress pink" id="dress2">换背带裤</button></div>
+        <div class="energy" style="--ec:#ff96c8">
+          <div class="etop"><span class="elv" id="elv-m2">Lv.0</span><span>能量 · 72格升一级，Lv.1 解锁裤装</span></div>
+          <div class="ebar" id="eg-m2"></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <div class="srch">
+        <input id="q" type="text" placeholder="搜电影名 / 小说名 / 影评关键词…" maxlength="50">
+        <button class="primary" id="doSearch">
+          <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>搜</button>
+        <button class="ghost sm" id="qClear">清空</button>
+      </div>
+      <div class="acts" style="margin-top:11px">
+        <button class="sm pink" id="goDouyin"><svg class="ico" viewBox="0 0 24 24"><path d="M9 3v12a4 4 0 104 4V9h4l1-3h-5"/></svg>去抖音找影评</button>
+        <button class="sm pink" id="goXhs"><svg class="ico" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg>去小红书找影评</button>
+      </div>
+      <div id="srchResults" style="margin-top:15px"></div>
+    </div>
+    <div style="margin-top:20px;padding-top:16px;border-top:2px dashed var(--line)">
+      <h3 style="font-size:15px;margin-bottom:11px">影评收藏（<span id="revCount" data-sp-bindable="database" data-sp-database-id="l7QS9IsJihcaB0K9mAUqO0">0</span> 条）</h3>
+      <div id="revList"></div>
+    </div>
+  </section>
+
+  <!-- ========== 模块3 推荐 ========== -->
+  <section class="card" id="mod3">
+    <div class="hero">
+      <div class="avt" data-char="m3"><span class="aura"></span><img data-outfit="0" src="https://workbuddy-space-static.codebuddy.work/image/ljUtDds5sNUXqIV5iot2Te.jpg" alt="推荐小助手"><div class="shadow"></div><span class="outfit-badge" id="ob-m3">Lv.1 解锁裤装</span></div>
+      <div class="bubble ag">
+        <p id="m3Talk">要看看我为你推荐的电影吗？</p>
+        <span class="who">推荐小助手 · 文静淡雅</span>
+        <div class="acts">
+          <button class="sm silver" id="talkNext3">换一句</button>
+          <button class="sm dress silver" id="dress3">换裤装</button>
+          <button class="sm ghost" id="refreshRec">按我的口味重排</button>
+        </div>
+        <div class="energy" style="--ec:#96afd7">
+          <div class="etop"><span class="elv" id="elv-m3">Lv.0</span><span>能量 · 72格升一级，Lv.1 解锁裤装</span></div>
+          <div class="ebar" id="eg-m3"></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:12px;padding:13px;border-radius:15px;background:linear-gradient(120deg,#f7fbff,#fdf7ff);border:2px solid var(--silver)">
+      <p style="font-size:13px;color:var(--ink2);font-weight:700">小银读到了你的口味分布：</p>
+      <div class="tags" id="tasteBox" style="margin-top:8px"></div>
+    </div>
+    <div class="rlist" id="recBox" style="margin-top:14px"></div>
+  </section>
+
+  <footer>紫薯观影手账 · 数据存在云端，多设备自动同步 ✿</footer>
+</div>
+
+<div class="thanks" id="thanks"></div>
+
+<nav class="st-tabs">
+  <div class="st-tab on" data-go="mod1"><svg class="ico" viewBox="0 0 24 24" style="margin:0 auto 3px;width:20px;height:20px"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 11-4z"/></svg>记录</div>
+  <div class="st-tab" data-go="mod2"><svg class="ico" viewBox="0 0 24 24" style="margin:0 auto 3px;width:20px;height:20px"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>查找</div>
+  <div class="st-tab" data-go="mod3"><svg class="ico" viewBox="0 0 24 24" style="margin:0 auto 3px;width:20px;height:20px"><path d="M12 2l2.9 6.3 6.9.8-5 4.7 1.3 6.8L12 17.3 5.9 20.6 7.2 13.8 2.2 9.1l6.9-.8z"/></svg>推荐</div>
+</nav>
+
+<script>__MODULE_SCRIPT__</script>
+</body>
+</html>
